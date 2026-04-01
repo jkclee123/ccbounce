@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BOUNCE_FILE="/tmp/ccbounce_target"
+rm -f "$BOUNCE_FILE" # clean stale file on startup
+
+while true; do
+  script -q /dev/null -c "claude --channels plugin:telegram@claude-plugins-official" || true
+
+  if [ -f "$BOUNCE_FILE" ]; then
+    dir="$(cat "$BOUNCE_FILE")"
+    rm -f "$BOUNCE_FILE"
+    if [ -d "$dir" ]; then
+      echo "[cctg] Bouncing to: $dir"
+      cd "$dir"
+    else
+      echo "[cctg] Warning: '$dir' not a directory, restarting in $(pwd)" >&2
+    fi
+    sleep 1
+    continue
+  fi
+
+  break
+done

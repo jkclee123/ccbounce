@@ -1,27 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+BOUNCE_FILE="/tmp/ccbounce_target"
+
 if [ $# -lt 1 ]; then
-  echo "Usage: ccbounce <directory>" >&2
-  exit 1
+    echo "Usage: ccbounce <directory>" >&2
+    exit 1
 fi
 
 dir="$1"
 
 if [ ! -d "$dir" ]; then
-  echo "Error: '$dir' is not a directory" >&2
-  exit 1
+    echo "Error: '$dir' is not a directory" >&2
+    exit 1
 fi
 
-# Pause to allow backgrounding to complete before killing claude
-sleep 2
+# Resolve to absolute path, write BEFORE killing (avoids race)
+echo "$(cd "$dir" && pwd -P)" > "$BOUNCE_FILE"
 
-# Kill all claude processes
-pkill -f claude || true
-
-# Small delay to let processes exit
-sleep 2
-
-# Start claude in the target directory
-cd "$dir"
-exec script -q /dev/null -c "claude 'say ready' --channels plugin:telegram@claude-plugins-official"
+# Kill claude — the cc wrapper will detect bounce file and restart
+pkill -f "^claude" || true
+pkill -f "script.*claude" || true
