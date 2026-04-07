@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BOUNCE_FILE="/tmp/ccbounce_target"
+BOUNCE_FILE="/tmp/ccbounce_target_${USER}"
 rm -f "$BOUNCE_FILE" # clean stale file on startup
 
 while true; do

@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BOUNCE_FILE="/tmp/ccbounce_target"
-
-if [ $# -lt 1 ]; then
-    echo "Usage: ccbounce <directory>" >&2
+if [ $# -lt 2 ]; then
+    echo "Usage: ccbounce <target_user> <directory>" >&2
     exit 1
 fi
 
-dir="$1"
+target_user="$1"
+dir="$2"
 
 if [ ! -d "$dir" ]; then
     echo "Error: '$dir' is not a directory" >&2
     exit 1
 fi
 
+BOUNCE_FILE="/tmp/ccbounce_target_${target_user}"
+
 # Resolve to absolute path, write BEFORE killing (avoids race)
 echo "$(cd "$dir" && pwd -P)" > "$BOUNCE_FILE"
 
 # Kill claude — the cc wrapper will detect bounce file and restart
-pkill -f "^claude" || true
-pkill -f "script.*claude" || true
+pkill -u "$target_user" -f "claude" || true
+pkill -u "$target_user" -f "script.*claude" || true
