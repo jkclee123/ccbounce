@@ -34,6 +34,20 @@ To bounce another user's Claude session:
 ccbounce alice /path/to/project
 ```
 
+## Running in tmux
+
+To keep `cctg` running across SSH disconnects, use a named tmux session:
+
+```bash
+# Start a named tmux session
+tmux new-session -s cctg -d 'cctg'
+
+# Detach from it (if attached): Ctrl+B then D
+
+# Reattach after SSH reconnect
+tmux attach -t cctg
+```
+
 ## How it works
 
 - `cctg` runs Claude in a loop. After Claude exits, it checks for a per-user bounce file (`/tmp/ccbounce_target_$USER`). If found, it restarts Claude in the specified directory. Otherwise it exits.
